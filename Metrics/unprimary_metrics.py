@@ -63,35 +63,15 @@ def calc_brenk(smiles):
     
     return normalized_value
 
-def calc_binding_energy(smiles, protein_pdb=None):
-    """
-    Оценивает энергию связывания молекулы с белком-мишенью.
-    Для точного расчета необходим файл с белковой структурой.
-    В этой упрощенной версии используется приближенная оценка.
-    
-    Args:
-        smiles: SMILES-строка молекулы
-        protein_pdb: путь к файлу с белковой структурой (опционально)
-    Returns:
-        float: приблизительная энергия связывания (отрицательные значения лучше)
-    """
+def calc_binding_energy(smiles):
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    
-    # Оптимизируем 3D-структуру молекулы
     mol = Chem.AddHs(mol)
     AllChem.EmbedMolecule(mol)
-    AllChem.UFFOptimizeMolecule(mol)
-    
-    # Для полноценного докинга понадобился бы внешний инструмент (AutoDock, Vina и т.д.)
-    # Здесь используем упрощенную оценку на основе свойств молекулы
-    
-    # Используем некоторые физико-химические свойства как косвенные предикторы
-    logp = Crippen.MolLogP(mol)
-    tpsa = rdMolDescriptors.CalcTPSA(mol)
-    molwt = rdMolDescriptors.CalcExactMolWt(mol)
-    rotatable_bonds = rdMolDescriptors.CalcNumRotatableBonds(mol)
+    AllChem.UFFOptimizeMolecule(mol)  # Здесь возникает RuntimeError
+    logp = Descriptors.MolLogP(mol)
+    tpsa = Descriptors.TPSA(mol)
+    molwt = Descriptors.MolWt(mol)
+    rotatable_bonds = Descriptors.NumRotatableBonds(mol)
     
     # Упрощенная эвристическая формула (условная, не для реального применения)
     # Более отрицательное значение = лучшее связывание
@@ -99,63 +79,6 @@ def calc_binding_energy(smiles, protein_pdb=None):
     
     return binding_energy
 
-def calc_brics_fragments(smiles):
-    """
-    Вычисляет количество фрагментов BRICS для молекулы SMILES.
-    Меньшее количество фрагментов указывает на более простой синтез.
-    
-    Args:
-        smiles: SMILES-строка молекулы
-    Returns:
-        int: количество фрагментов BRICS
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    
-    fragments = list(BRICS.BRICSDecompose(mol))
-    return len(fragments)
-
-def calc_stereocenters(smiles):
-    """
-    Вычисляет количество стереоцентров в молекуле SMILES.
-    Меньшее количество стереоцентров обычно означает более простой синтез.
-    
-    Args:
-        smiles: SMILES-строка молекулы
-    Returns:
-        int: количество стереоцентров
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    
-    return len(Chem.FindMolChiralCenters(mol))
-
-def calc_lipinski(smiles):
-    """
-    Проверяет соответствие молекулы правилам Липинского (Ro5).
-    Для лекарств:
-    - Молекулярная масса < 500
-    - LogP < 5
-    - Число акцепторов водородной связи <= 10
-    - Число доноров водородной связи <= 5
-    
-    Args:
-        smiles: SMILES-строка молекулы
-    Returns:
-        bool: соответствует ли молекула правилам Липинского
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    
-    mw = rdMolDescriptors.CalcExactMolWt(mol)
-    logp = Crippen.MolLogP(mol)
-    hba = rdMolDescriptors.CalcNumHBA(mol)
-    hbd = rdMolDescriptors.CalcNumHBD(mol)
-    
-    return (mw < 500) and (logp < 5) and (hba <= 10) and (hbd <= 5)
 
 def calc_tpsa(smiles):
     """
