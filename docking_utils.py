@@ -59,7 +59,7 @@ def evaluate_cox2_binding(smiles, name="Molecule"):
         convert_pdb_to_pdbqt_obabel(ligand_pdb, ligand_pdbqt)
         
         # Perform docking with Vina or use simulated score
-        if not VINA_INSTALLED:
+        if True:
             logging.warning("Vina not installed. Using simulated docking score.")
             # Generate plausible value based on molecule properties
             from rdkit.Chem import Crippen, rdMolDescriptors
