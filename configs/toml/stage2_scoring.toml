@@ -1,0 +1,24 @@
+### Stage 2 scoring components
+#[[component]]
+#[component.QED]
+#
+#[[component.QED.endpoint]]
+#weight = 0.5  # user chosen name for output
+#name = "QED Score"  # weight to fine-tune the relevance of this component
+
+#transform.type = "sigmoid"
+#transform.low = 0.3        # QED scores are between 0 and 1
+#transform.high = 0.9       # Encourage values closer to 1
+#transform.k = 0.25         # Curve steepness
+
+
+[[component]]
+[component.external_process]
+
+[[component.external_process.endpoint]]
+name = "My External Score"
+weight = 1.0
+
+params.executable = "/Users/maksimg/Dev/ML/hacks/prostoxsber/REINVENT4/reinvent_env/bin/python"
+
+params.args = "comp_my_score.py"
